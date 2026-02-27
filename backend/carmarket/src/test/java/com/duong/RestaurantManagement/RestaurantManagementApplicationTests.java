@@ -1,10 +1,10 @@
-package com.duong.carmarket;
+package com.duong.RestaurantManagement;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CarmarketApplicationTests {
+class RestaurantManagementApplicationTests {
 
 	@Test
 	void contextLoads() {

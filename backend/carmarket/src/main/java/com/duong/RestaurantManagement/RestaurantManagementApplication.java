@@ -1,13 +1,13 @@
-package com.duong.carmarket;
+package com.duong.RestaurantManagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CarmarketApplication {
+public class RestaurantManagementApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CarmarketApplication.class, args);
+		SpringApplication.run(RestaurantManagementApplication.class, args);
 	}
 
 }
