@@ -24,6 +24,7 @@ public class DiningSession {
 
     private LocalDateTime endAt;
 
+    @Enumerated(EnumType.STRING)
     private DiningStatus diningStatus;
 
 

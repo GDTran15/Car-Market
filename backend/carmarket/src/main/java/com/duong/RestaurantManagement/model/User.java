@@ -1,8 +1,6 @@
 package com.duong.RestaurantManagement.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +25,9 @@ public class User {
     private int phone;
 
     private LocalDate createdAt;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 
 }

@@ -21,6 +21,7 @@ public class Payment {
 
     private LocalDateTime paidAt;
 
+    @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
     @ManyToOne

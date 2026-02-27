@@ -26,6 +26,7 @@ public class Invoice {
 
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
     private InvoiceStatus invoiceStatus;
 
 

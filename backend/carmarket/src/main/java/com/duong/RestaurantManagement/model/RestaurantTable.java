@@ -1,9 +1,6 @@
 package com.duong.RestaurantManagement.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +21,7 @@ public class RestaurantTable {
 
     private int capacity;
 
+    @Enumerated(EnumType.STRING)
     private RestaurantTableStatus restaurantTableStatus;
 
     @OneToMany(mappedBy = "restaurantTable")
