@@ -15,6 +15,7 @@ import java.util.List;
 public class MenuItem {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long menuItemId;
 
 

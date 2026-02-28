@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "members")
 public class Member {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long member_id;
 
     private String firstName;

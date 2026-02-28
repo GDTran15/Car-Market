@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class FoodCategoryMap {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long foodCategoryMapId;
 
     @ManyToOne

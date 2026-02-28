@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "memberships")
 public class Membership {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int membershipId;
 
     @Enumerated(EnumType.STRING)

@@ -15,6 +15,7 @@ import java.util.List;
 @Table(name = "restaurant_tables")
 public class RestaurantTable {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int restaurantTableId;
 
     private int restaurantTableNumber;

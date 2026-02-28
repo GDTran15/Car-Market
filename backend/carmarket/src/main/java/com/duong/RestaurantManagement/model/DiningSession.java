@@ -18,6 +18,7 @@ import java.util.List;
 public class DiningSession {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long DiningSessionId;
 
     private LocalDateTime startAt;

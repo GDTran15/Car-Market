@@ -36,26 +36,21 @@ public class SecurityConfiguration {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests.requestMatchers("/auth").permitAll().anyRequest().authenticated())
-                    .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                        authorizeRequests.requestMatchers("/register",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui.html"
+                                ).permitAll()
+                                .anyRequest().authenticated())
+                    .sessionManagement(sessionManagement
+                            -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         return http.build();
     }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
-    @Bean
-    UserDetailsService userDetailsService(PasswordEncoder encoder) {
-        String password = encoder.encode("password");
-        UserDetails user = User.withUsername("user").password(password).roles("USER").build();
-        return new InMemoryUserDetailsManager(user);
-    }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
