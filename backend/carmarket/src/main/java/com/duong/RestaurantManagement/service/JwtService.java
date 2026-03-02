@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -21,26 +23,23 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+
+    private UserDetails userDetails;
+
+    @Value("$jwt.service")
     private String secretKey;
 
-    JwtService(){
-        this.secretKey = getSecretKey();
-    }
 
 
-    public String getSecretKey()  {
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256"); // use key gen that generate 256 key
-            SecretKey secretKey = keyGenerator.generateKey();
-            return Base64.getEncoder().encodeToString(secretKey.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<String, Object>();
+        claims.put("roles", userDetails.getAuthorities()
+                                        .stream().map(GrantedAuthority::getAuthority)
+                                        .toList());
+                                                ;
 
         return Jwts.builder()
                 .setClaims(claims)

@@ -16,7 +16,7 @@ public record UserRegisterRequestDTO (
         String email,
         @NotBlank(message = "Please enter your password")
         String password,
-        @Size(min = 10, max = 10)
+
         int phone,
         LocalDate createAt,
         Role role

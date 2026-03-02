@@ -39,7 +39,8 @@ public class SecurityConfiguration {
                         authorizeRequests.requestMatchers("/register",
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**",
-                                        "/swagger-ui.html"
+                                        "/swagger-ui.html",
+                                "/cookies"
                                 ).permitAll()
                                 .anyRequest().authenticated())
                     .sessionManagement(sessionManagement

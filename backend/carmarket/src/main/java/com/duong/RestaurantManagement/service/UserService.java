@@ -1,21 +1,31 @@
 package com.duong.RestaurantManagement.service;
 
+import com.duong.RestaurantManagement.dto.user.request.UserLoginRequestDTO;
 import com.duong.RestaurantManagement.dto.user.request.UserRegisterRequestDTO;
+import com.duong.RestaurantManagement.dto.user.response.UserLoginResponseDTO;
 import com.duong.RestaurantManagement.exception.DuplicateResourceException;
 import com.duong.RestaurantManagement.model.User;
 import com.duong.RestaurantManagement.repo.UserRepo;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepo userRepo;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Transactional
     public void registerANewUser(UserRegisterRequestDTO userRegisterRequestDTO) {
@@ -46,5 +56,19 @@ public class UserService {
 
     }
 
+    public UserLoginResponseDTO loginForUser(@Valid UserLoginRequestDTO userLoginRequestDTO, HttpServletResponse httpServletResponse) {
+        Authentication authentication= authenticationManager.authenticate( new UsernamePasswordAuthenticationToken(userLoginRequestDTO.username(), userLoginRequestDTO.password()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = jwtService.generateToken(userLoginRequestDTO.username());
+        Cookie cookie = new Cookie("token", token);
+        cookie.setMaxAge(60*60*24);
+        cookie.setHttpOnly(true); //mean no js
+        cookie.setPath("/");    // send cookies to all
+        cookie.setSecure(true);
+        httpServletResponse.addCookie(cookie); // 1 day
+        httpServletResponse.setStatus(200);
+        User user = userRepo.findByUsername(userLoginRequestDTO.username()).get();
+        return new UserLoginResponseDTO(user.getUsername(), user.getRole());
+    }
 }
 
