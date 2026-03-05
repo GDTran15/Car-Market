@@ -25,7 +25,7 @@ public class OrderItem {
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "menu_item_id")
-    private MenuItem menuItem;
+    @JoinColumn(name = "food_id")
+    private Food food;
 
 }

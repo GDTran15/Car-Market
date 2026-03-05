@@ -53,6 +53,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests.requestMatchers("/register",
                                         "/login",
+                                        "/food-category",
+                                        "/foods",
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**",
                                         "/swagger-ui.html",

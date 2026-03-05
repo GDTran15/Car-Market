@@ -1,11 +1,13 @@
 package com.duong.RestaurantManagement.repo;
 
-import com.duong.RestaurantManagement.model.Menu;
+import com.duong.RestaurantManagement.model.Food;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MenuRepo extends JpaRepository<Menu, Long> {
+public interface FoodRepo extends JpaRepository<Food, Long> {
 
-    boolean existsByMenuName(String menuName);
+    boolean existsByFoodName(String foodName);
+
+
 }

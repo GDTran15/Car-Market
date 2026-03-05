@@ -27,7 +27,6 @@ public class MenuItem {
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
-    @OneToMany(mappedBy = "menuItem")
-    private List<OrderItem> orderItems;
+
 
 }
