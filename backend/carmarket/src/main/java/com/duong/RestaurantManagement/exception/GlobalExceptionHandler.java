@@ -18,10 +18,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = DuplicateResourceException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<ErrorApiResponse> userAlreadyExistException(DuplicateResourceException e) {
+    public ResponseEntity<ErrorApiResponse> resourceAlreadyExist(DuplicateResourceException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(
                         new ErrorApiResponse(HttpStatus.CONFLICT.value(), e.getMessage())
+                );
+    }
+
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<ErrorApiResponse> resourceNotFound(ResourceNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(
+                        new ErrorApiResponse(HttpStatus.NOT_FOUND.value(), e.getMessage())
                 );
     }
 

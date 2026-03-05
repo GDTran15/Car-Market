@@ -1,5 +1,6 @@
 package com.duong.RestaurantManagement.service;
 
+import com.duong.RestaurantManagement.exception.ResourceNotFoundException;
 import com.duong.RestaurantManagement.model.Food;
 import com.duong.RestaurantManagement.model.FoodCategoryMap;
 import com.duong.RestaurantManagement.repo.FoodCategoryMapRepo;
@@ -19,7 +20,9 @@ public class FoodCategoryMapService {
     @Transactional
     public void mapFoodToCategory(Food newFood, Long foodCategoryId) {
         FoodCategoryMap foodCategoryMap = FoodCategoryMap.builder()
-                .foodCategory(foodCategoryRepo.findById(foodCategoryId).get()) // relook
+                .foodCategory(foodCategoryRepo.findById(foodCategoryId).orElseThrow(
+                        () -> new ResourceNotFoundException("Category not found")
+                ))
                 .food(newFood)
                 .build();
         foodCategoryMapRepo.save(foodCategoryMap);
