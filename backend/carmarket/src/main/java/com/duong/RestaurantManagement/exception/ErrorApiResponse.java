@@ -1,5 +1,8 @@
 package com.duong.RestaurantManagement.exception;
 
+import lombok.Getter;
+
+@Getter
 public class ErrorApiResponse {
         private int status;
         private String message;

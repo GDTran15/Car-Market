@@ -23,4 +23,5 @@ public class FoodCategory {
 
     @OneToMany(mappedBy = "foodCategory")
     private List<FoodCategoryMap> foodCategoryMaps;
+
 }

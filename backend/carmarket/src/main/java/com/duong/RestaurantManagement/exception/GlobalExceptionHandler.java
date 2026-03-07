@@ -33,7 +33,6 @@ public class GlobalExceptionHandler {
                         new ErrorApiResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage())
                 );
     }
-
     @ExceptionHandler(value = ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorApiResponse> resourceNotFound(ResourceNotFoundException e) {
@@ -42,6 +41,15 @@ public class GlobalExceptionHandler {
                         new ErrorApiResponse(HttpStatus.NOT_FOUND.value(), e.getMessage())
                 );
     }
+
+    @ExceptionHandler(value = FoodCategoryNotEmptyException.class)
+    public ResponseEntity<ErrorApiResponse> foodCategoryNotEmpty(FoodCategoryNotEmptyException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(
+                        new ErrorApiResponse(HttpStatus.CONFLICT.value(), e.getMessage())
+                );
+    }
+
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
