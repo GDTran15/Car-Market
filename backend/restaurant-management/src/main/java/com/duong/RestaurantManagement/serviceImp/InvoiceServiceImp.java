@@ -2,15 +2,13 @@ package com.duong.RestaurantManagement.serviceImp;
 
 
 import com.duong.RestaurantManagement.dto.invoice.response.InvoiceResponseDTO;
+import com.duong.RestaurantManagement.exception.InvalidOrderStateException;
 import com.duong.RestaurantManagement.exception.InvoiceHasBeenPaidException;
 import com.duong.RestaurantManagement.exception.ResourceNotFoundException;
 import com.duong.RestaurantManagement.mapper.InvoiceMapper;
 import com.duong.RestaurantManagement.model.*;
 import com.duong.RestaurantManagement.repo.*;
-import com.duong.RestaurantManagement.service.DiningSessionService;
-import com.duong.RestaurantManagement.service.InvoiceService;
-import com.duong.RestaurantManagement.service.MemberService;
-import com.duong.RestaurantManagement.service.RestaurantTableService;
+import com.duong.RestaurantManagement.service.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,15 +34,17 @@ public class InvoiceServiceImp implements InvoiceService {
     private final RestaurantTableRepo restaurantTableRepo;
 
     private final RestaurantTableService restaurantTableService;
-
+    private final OrderService orderService;
 
 
     @Transactional
     @Override
     public InvoiceResponseDTO createNewInvoice(Long tableId) {
         DiningSession diningSession = diningSessionRepo.findByDiningStatusAndRestaurantTable_RestaurantTableId(DiningStatus.ACTIVE,tableId)
-                .orElseThrow(() -> new RuntimeException("No dining session found for this table"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("No dining session found for this table"));
+        if (orderService.hasActiveOrderByDiningSession(diningSession.getDiningSessionId())){
+            throw new InvalidOrderStateException("There still active order in dining session");
+        }
 
         double diningSessionPrice = diningSessionService.getDiningSessionTotalOrderPrice(diningSession.getDiningSessionId());
         Invoice invoice = Invoice.builder()
@@ -57,9 +57,7 @@ public class InvoiceServiceImp implements InvoiceService {
                 .build();
         invoiceRepo.save(invoice);
         diningSessionService.deactiveDinningSession(diningSession.getDiningSessionId());
-        restaurantTableService.changeTableStatus(restaurantTableRepo.findById(tableId).orElseThrow(
-                () -> new ResourceNotFoundException("No restaurant table found ")
-        ));
+        restaurantTableService.changeTableStatus(diningSession.getRestaurantTable());
         return InvoiceMapper.invoiceToCreateInvoiceResponse(invoice);
     }
 
