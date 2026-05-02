@@ -3,10 +3,7 @@ package com.duong.RestaurantManagement.serviceImp;
 import com.duong.RestaurantManagement.dto.dining_session.response.GetDiningSessionDTO;
 import com.duong.RestaurantManagement.exception.DiningSessionNotActiveException;
 import com.duong.RestaurantManagement.exception.ResourceNotFoundException;
-import com.duong.RestaurantManagement.model.DiningSession;
-import com.duong.RestaurantManagement.model.DiningStatus;
-import com.duong.RestaurantManagement.model.Order;
-import com.duong.RestaurantManagement.model.RestaurantTable;
+import com.duong.RestaurantManagement.model.*;
 import com.duong.RestaurantManagement.repo.DiningSessionRepo;
 import com.duong.RestaurantManagement.repo.OrderRepo;
 import com.duong.RestaurantManagement.repo.RestaurantTableRepo;
@@ -78,6 +75,7 @@ public class DiningSessionServiceImp implements DiningSessionService {
     public double getDiningSessionTotalOrderPrice(Long diningSessionId) {
         return orderRepo.findByDiningSession_DiningSessionId(diningSessionId)
                 .stream()
+                .filter(order -> order.getOrderStatus() == OrderStatus.COMPLETED)
                 .mapToDouble(Order::getOrderPrice)
                 .sum();
     }
