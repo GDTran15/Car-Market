@@ -70,4 +70,6 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     
 """)
     List<GetOrderNumberForEachStatus> getOrderCountByOrderStatus();
+
+    boolean existsByDiningSession_DiningSessionIdAndOrderStatusIn(Long diningSessionId, List<OrderStatus> orderStatus);
 }
