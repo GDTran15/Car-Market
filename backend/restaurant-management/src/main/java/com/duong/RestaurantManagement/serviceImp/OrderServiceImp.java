@@ -127,6 +127,14 @@ public class OrderServiceImp implements OrderService {
     }
 
     @Override
+    public boolean hasActiveOrderByDiningSession(Long diningSessionId) {
+        return orderRepo.existsByDiningSession_DiningSessionIdAndOrderStatusIn(
+                diningSessionId,
+                List.of(OrderStatus.PENDING, OrderStatus.IN_PROGRESS)
+        );
+    }
+
+    @Override
     public List<GetOrderNumberForEachStatus> getNumberOfOrderForEachStatus() {
         Map<OrderStatus,Long> map = new EnumMap<>(OrderStatus.class);
         for (OrderStatus orderStatus : OrderStatus.values()) {
