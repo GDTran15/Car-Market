@@ -30,8 +30,6 @@ public class Order {
 
     @Column(unique = true, nullable = false)
     private String orderNumber;
-
-
     @ManyToOne
     @JoinColumn(name = "dining_session_id")
     private DiningSession diningSession;

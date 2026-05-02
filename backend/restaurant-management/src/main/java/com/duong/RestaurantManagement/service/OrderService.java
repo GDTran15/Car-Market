@@ -29,4 +29,6 @@ public interface OrderService {
     List<GetOrderForAdminDTO> getOrderByStatus(OrderStatus orderStatus);
 
     List<Order> getOrderFromDiningSession(Long diningSessionId);
+
+     boolean hasActiveOrderByDiningSession(Long diningSessionId);
 }

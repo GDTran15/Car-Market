@@ -9,6 +9,7 @@ import com.duong.RestaurantManagement.repo.InvoiceRepo;
 import com.duong.RestaurantManagement.repo.OrderRepo;
 import com.duong.RestaurantManagement.repo.PaymentRepo;
 import com.duong.RestaurantManagement.service.InvoiceService;
+import com.duong.RestaurantManagement.service.OrderService;
 import com.duong.RestaurantManagement.service.PaymentService;
 import com.paypal.sdk.PaypalServerSdkClient;
 import com.paypal.sdk.controllers.OrdersController;
@@ -35,6 +36,7 @@ public class PaymentServiceImp implements PaymentService {
     private final InvoiceRepo invoiceRepo;
     private final InvoiceService invoiceService;
     private final PaypalServerSdkClient paypalClient;
+    private final OrderService orderService;
 
     private final PaymentRepo paymentRepo;
 
