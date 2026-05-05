@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AdminOrderCard from "../../../component/AdminOrderCard";
 import api from "../../../api";
 
-export default function InProgressOrder(){
+export default function InProgressOrder({onStatusChange}){
         const [inProgressOrderList,setInProgressOrderList] = useState([]);
     
      useEffect(() => {
@@ -21,6 +21,6 @@ export default function InProgressOrder(){
   ,[]);
         return(<>
         
-                    <AdminOrderCard orderStatus={"in-progress"} orderList={inProgressOrderList}/>
+                    <AdminOrderCard orderStatus={"in-progress"} orderList={inProgressOrderList} onStatusChange={onStatusChange}/>
         </>)
 }

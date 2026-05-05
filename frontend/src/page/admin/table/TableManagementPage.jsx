@@ -3,11 +3,13 @@ import Button from "../../../component/Button";
 import FormWrapper from "../../../component/FormWrapper";
 import { useEffect, useState } from "react";
 import InputField from "../../../component/InputField";
+import { useNavigate } from "react-router-dom";
 
 import TableCard from "../../../component/TableCard";
 import api from "../../../api";
 
 export default function TableManagementPage() {
+    const navigate = useNavigate();
     
     const [restaurantTableNumber, setRestaurantTableNumber] = useState();
     const [capacity,setCapacity] = useState();
@@ -62,6 +64,27 @@ export default function TableManagementPage() {
         }
     }
 
+    const handleCreateInvoice = async (restaurantTableId,restaurantTableNumber) => {
+        try {
+            const response = await api.post(`/invoices/${restaurantTableId}`);
+            console.log(response);
+            const invoice = response.data;
+            const invoiceId = invoice.invoiceId;
+
+            handleGetTable();
+
+
+            navigate(`/admin/invoices/${invoiceId ?? "created"}`, {
+                state: {
+                    invoice,
+                    restaurantTableId,
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         handleGetTable();
     },[])
@@ -88,11 +111,13 @@ export default function TableManagementPage() {
         <div className="mt-6 grid md:grid-cols-4 gap-3">
             {tableList.map(table =>(
                 <TableCard 
+                key={table.restaurantTableId}
                 restaurantTableId= {table.restaurantTableId}
                 restaurantTableNumber={table.restaurantTableNumber}
                 capacity={table.capacity}
                 restaurantTableStatus={table.restaurantTableStatus}
                 deleteTable={handleDeleteTable}
+                onCreateInvoice={handleCreateInvoice}
                 
                 />
             )

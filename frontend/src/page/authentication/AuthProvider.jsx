@@ -25,13 +25,14 @@ export const AuthProvider = ({ children }) => {
     
   const refreshAccessToken = async () => {
    try {
-      const response = await api.post(`/refresh-token`,{
-        isPublic : true
+      const response = await api.post(`/refresh-token`, null, {
+        skipAuth: true
       });
       console.log("access token generate, " + response.data.accessToken)
       setToken(response.data.accessToken)
    } catch  {
     setToken(null);
+    delete api.defaults.headers.common.Authorization;
    } finally{
     setIsLoading(false);
    }  };
@@ -44,8 +45,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const authInterceptor = api.interceptors.request.use(
       (config) => {
-        
-        config.headers.Authorization = !config._retry && token &&  !config.isPublic ? `Bearer ${token}` : config.headers.Authorization;
+        config.headers = config.headers || {};
+
+        if (config.skipAuth) {
+          delete config.headers.Authorization;
+          return config;
+        }
+
+        if (config._retry && config.headers.Authorization) {
+          return config;
+        }
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        } else {
+          delete config.headers.Authorization;
+        }
+
         return config;
       },
       (error) => Promise.reject(error)
@@ -70,7 +86,9 @@ export const AuthProvider = ({ children }) => {
   !originalRequest.url.includes("/refresh-token")
                 ){
                     try {
-                        const response = await api.post(`/refresh-token`);
+                        const response = await api.post(`/refresh-token`, null, {
+                          skipAuth: true
+                        });
                         setToken(response.data.accessToken);
                         originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
                         originalRequest._retry = true;
@@ -78,6 +96,7 @@ export const AuthProvider = ({ children }) => {
                     } catch {
                     
                         setToken(null)
+                        delete api.defaults.headers.common.Authorization;
                     }
                 }
                 return Promise.reject(error);

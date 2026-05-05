@@ -4,6 +4,7 @@ import { MdOutlineRestaurant, MdTableRestaurant } from "react-icons/md";
 import { IoFastFoodSharp } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
 import { TbPackage } from "react-icons/tb";
+import { FaFileInvoiceDollar } from "react-icons/fa6";
 
 export default function NavBar({ username }) {
   return (
@@ -20,6 +21,7 @@ export default function NavBar({ username }) {
         <SideBarIcon to="/admin/menus" icon={<MdOutlineRestaurant size={28} />} text="Menu" />
         <SideBarIcon to="/admin/foods" icon={<IoFastFoodSharp size={28} />} text="Food" />
         <SideBarIcon to="/admin/orders" icon={<TbPackage size={28}/>} text="Order"/>
+        <SideBarIcon to="/admin/invoices" icon={<FaFileInvoiceDollar size={28} />} text="Invoice" />
       </div>
 
       <div>

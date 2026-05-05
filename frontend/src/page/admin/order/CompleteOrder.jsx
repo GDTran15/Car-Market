@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import AdminOrderCard from "../../../component/AdminOrderCard";
 import api from "../../../api";
 
-export default function CompleteOrder(){
+export default function CompleteOrder({onStatusChange}){
         const [completeOrderList,setCompleteOrderList] = useState([]);
     
      useEffect(() => {
@@ -21,6 +21,6 @@ export default function CompleteOrder(){
         
   ,[]);
         return(<>
-            <AdminOrderCard orderStatus={"complete"} orderList={completeOrderList}/>
+            <AdminOrderCard orderStatus={"complete"} orderList={completeOrderList} onStatusChange={onStatusChange}/>
         </>)
 }

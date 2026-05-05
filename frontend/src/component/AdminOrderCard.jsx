@@ -1,27 +1,27 @@
-import axios from "axios";
 import Button from "./Button";
+import api from "../api";
 
-export default function AdminOrderCard({orderStatus,orderList}){
+export default function AdminOrderCard({orderStatus,orderList,onStatusChange}){
     const handleStartProgress = async (orderId) => {
         try {
-            const response = await axios.patch(`http://localhost:8080/orders/${orderId}/processing`);
-            console.log(response)
+            await api.patch(`/orders/${orderId}/processing`);
+            onStatusChange?.("inprogress");
         } catch (error) {
             console.log(error);
         }
     }
     const handleComplete = async (orderId) => {
         try {
-            const response = await axios.patch(`http://localhost:8080/orders/${orderId}/complete`);
-            console.log(response)
+            await api.patch(`/orders/${orderId}/complete`);
+            onStatusChange?.("complete");
         } catch (error) {
             console.log(error);
         }
     }
     const handleCancelled = async (orderId) => {
         try {
-            const response = await axios.patch(`http://localhost:8080/orders/${orderId}/cancelled`);
-            console.log(response)
+            await api.patch(`/orders/${orderId}/cancelled`);
+            onStatusChange?.("cancelled");
         } catch (error) {
             console.log(error);
         }
@@ -32,7 +32,7 @@ export default function AdminOrderCard({orderStatus,orderList}){
     return (<>
         <div className="mt-10 flex flex-col gap-3">
                     {orderList.map((order) => (
-                        <div className="bg-white p-4 rounded-xl relative">
+                        <div key={order.orderId} className="bg-white p-4 rounded-xl relative">
 
                         {orderStatus === "pending" ?
                         <>
@@ -71,7 +71,7 @@ export default function AdminOrderCard({orderStatus,orderList}){
                             </p>
                         <div className="flex flex-col gap-2 border-b border-gray-300 pb-7" >
                             {order.orderItems.map((orderItem) => (
-                                <div className="flex justify-between ">
+                                <div key={orderItem.orderItemId ?? orderItem.foodId} className="flex justify-between ">
                                     <p>{orderItem.quantity}x {orderItem.foodName}</p>
                                     <p>${orderItem.foodPrice.toFixed(2)}</p>
                                 </div>

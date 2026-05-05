@@ -11,6 +11,8 @@ import FoodManagementPage from './page/admin/food_management/FoodManagementPage.
 import MenuManagementPage from './page/admin/menu/MenuManagementPage.jsx'
 import StaffManagementPage from './page/admin/staff/StaffManagementPage.jsx'
 import TableManagementPage from './page/admin/table/TableManagementPage.jsx'
+import InvoicePage from './page/admin/invoice/InvoicePage.jsx'
+import InvoiceManagementPage from './page/admin/invoice/InvoiceManagementPage.jsx'
 import MenuDetailPage from './page/admin/menu/MenuDetailPage.jsx'
 import CustomerMenuPage from './page/customer/CustomerMenuPage.jsx'
 import CustomerOrderPage from './page/customer/CustomerOrderPage.jsx'
@@ -37,6 +39,8 @@ const router = createBrowserRouter([
           { path: "menus/:menuId", element: <MenuDetailPage /> },
           { path: "staffs", element: <StaffManagementPage /> },
           { path: "tables", element: <TableManagementPage /> },
+          { path: "invoices", element: <InvoiceManagementPage /> },
+          { path: "invoices/:invoiceId", element: <InvoicePage /> },
           { path: "orders", element: <OrderManagementPage/>}
         ],
   },

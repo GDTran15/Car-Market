@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import AdminOrderCard from "../../../component/AdminOrderCard";
 import api from "../../../api";
 
-export default function CancelledOrder(){
+export default function CancelledOrder({onStatusChange}){
         const [cancelledOrderList,setCancelledOrderList] = useState([]);
     
      useEffect(() => {
@@ -21,6 +21,6 @@ export default function CancelledOrder(){
         
   ,[]);
         return(<>
-            <AdminOrderCard orderStatus={"cancelled"} orderList={cancelledOrderList}/>
+            <AdminOrderCard orderStatus={"cancelled"} orderList={cancelledOrderList} onStatusChange={onStatusChange}/>
         </>)
 }

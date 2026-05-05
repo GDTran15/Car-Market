@@ -1,6 +1,4 @@
-import axios from "axios";
 import { useState } from "react";
-import { BACKEND_URL } from "../config";
 
 
 import { useNavigate } from "react-router-dom";
@@ -23,11 +21,13 @@ export default function LoginPage(){
                 {
                     username : username,
                     password : password
+                },
+                {
+                    skipAuth: true
                 }
             )
             
             setToken(response.data.accessToken);
-            api.defaults.headers.common["Authorization"] = `Bearer ${response.data.accessToken}`;
 
              navigate("/admin");
             

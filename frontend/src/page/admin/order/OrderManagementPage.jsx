@@ -11,20 +11,35 @@ export default function OrderManagementPage(){
     const [orderStatusCount,setOrderStatusCount] = useState([]);
     const [currentPage,setCurrentPage] = useState("pending");
 
+    const handleGetOrderStatusCount = async () => {
+        try {
+            const response = await api.get(`/orders/count/session`);
+            console.log(response);
+            setOrderStatusCount(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleOrderStatusChange = (nextPage) => {
+        setCurrentPage(nextPage);
+        handleGetOrderStatusCount();
+    }
+
     let mainContent;
     
     switch(currentPage){
         case "pending":
-            mainContent = <PendingOrder/>;
+            mainContent = <PendingOrder onStatusChange={handleOrderStatusChange}/>;
             break;
         case "inprogress":
-            mainContent = <InProgressOrder/>;
+            mainContent = <InProgressOrder onStatusChange={handleOrderStatusChange}/>;
             break;
         case "complete": 
-            mainContent = <CompleteOrder/>;
+            mainContent = <CompleteOrder onStatusChange={handleOrderStatusChange}/>;
             break;
         case "cancelled": 
-            mainContent = <CancelledOrder/>;
+            mainContent = <CancelledOrder onStatusChange={handleOrderStatusChange}/>;
             break;
 
     }
@@ -50,19 +65,8 @@ export default function OrderManagementPage(){
 
 
    useEffect(() => {
-         const handleGetOrderStatusCount = async () => {
-        try {
-            const response = await api.get(`/orders/count/session`);
-            console.log(response);
-            setOrderStatusCount(response.data);
-        } catch (error) {
-            console.log(error);
-        }
-    }
           handleGetOrderStatusCount();
-    } 
-        
-  ,[]);
+    } ,[]);
 
     
 
@@ -73,7 +77,7 @@ export default function OrderManagementPage(){
                 <div className="grid md:grid-cols-4  gap-3">
                     
                     {orderStatusCount.map((orderStatus) => (
-                        <div className="bg-white p-4 rounded-xl">
+                        <div key={orderStatus.orderStatus} className="bg-white p-4 rounded-xl">
                             <h6 className="text-gray-500">{orderStatusToString(orderStatus.orderStatus)}</h6>
                             <p>{orderStatus.count}</p>
                     </div>

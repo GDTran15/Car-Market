@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AdminOrderCard from "../../../component/AdminOrderCard";
 import api from "../../../api";
 
-export default function PendingOrder(){
+export default function PendingOrder({onStatusChange}){
         const [pendingOrderList,setPendingOrderList] = useState([]);
     
      useEffect(() => {
@@ -22,6 +22,6 @@ export default function PendingOrder(){
         
   ,[]);
         return(<>
-            <AdminOrderCard orderStatus={"pending"} orderList={pendingOrderList}/>
+            <AdminOrderCard orderStatus={"pending"} orderList={pendingOrderList} onStatusChange={onStatusChange}/>
         </>)
 }
