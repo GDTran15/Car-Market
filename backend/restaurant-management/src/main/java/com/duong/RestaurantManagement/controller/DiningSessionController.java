@@ -2,10 +2,13 @@ package com.duong.RestaurantManagement.controller;
 
 
 import com.duong.RestaurantManagement.dto.dining_session.response.GetDiningSessionDTO;
+import com.duong.RestaurantManagement.dto.order.response.GetOrderItemDTO;
 import com.duong.RestaurantManagement.service.DiningSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/dining-sessions")
@@ -19,6 +22,11 @@ public class DiningSessionController {
             @RequestParam String tableQrToken
     ) {
       return ResponseEntity.ok(diningSessionService.getDiningSession(tableQrToken)) ;
+    }
+
+    @GetMapping("/{diningSessionId}/order-items")
+    public ResponseEntity<List<GetOrderItemDTO>> getDiningSessionOrderItems(@PathVariable Long diningSessionId) {
+        return  ResponseEntity.ok(diningSessionService.getDiningSessionOrderItems(diningSessionId));
     }
 
     @PatchMapping("/{diningSessionId}/deactivate") // only for testing during building era

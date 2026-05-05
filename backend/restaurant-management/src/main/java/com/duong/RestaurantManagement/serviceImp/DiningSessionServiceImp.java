@@ -1,14 +1,15 @@
 package com.duong.RestaurantManagement.serviceImp;
 
 import com.duong.RestaurantManagement.dto.dining_session.response.GetDiningSessionDTO;
+import com.duong.RestaurantManagement.dto.order.response.GetOrderItemDTO;
 import com.duong.RestaurantManagement.exception.DiningSessionNotActiveException;
 import com.duong.RestaurantManagement.exception.ResourceNotFoundException;
 import com.duong.RestaurantManagement.model.*;
 import com.duong.RestaurantManagement.repo.DiningSessionRepo;
+import com.duong.RestaurantManagement.repo.OrderItemRepo;
 import com.duong.RestaurantManagement.repo.OrderRepo;
 import com.duong.RestaurantManagement.repo.RestaurantTableRepo;
 import com.duong.RestaurantManagement.service.DiningSessionService;
-import com.duong.RestaurantManagement.service.OrderService;
 import com.duong.RestaurantManagement.service.RestaurantTableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class DiningSessionServiceImp implements DiningSessionService {
     private final RestaurantTableService restaurantTableService;
     private final RestaurantTableRepo restaurantTableRepo;
     private final OrderRepo orderRepo;
+    private final OrderItemRepo orderItemRepo;
 
     @Override
     public boolean checkIfAnyDinningSessionActive() {
@@ -73,11 +76,39 @@ public class DiningSessionServiceImp implements DiningSessionService {
 
     @Override
     public double getDiningSessionTotalOrderPrice(Long diningSessionId) {
-        return orderRepo.findByDiningSession_DiningSessionId(diningSessionId)
-                .stream()
-                .filter(order -> order.getOrderStatus() == OrderStatus.COMPLETED)
-                .mapToDouble(Order::getOrderPrice)
-                .sum();
+        return orderRepo.getTotalOrderPriceByDiningSessionIdAndStatus(diningSessionId,OrderStatus.COMPLETED);
     }
+
+    @Override
+    public List<GetOrderItemDTO> getDiningSessionOrderItems(Long diningSessionId) {
+        return orderItemRepo.findByOrder_DiningSession_DiningSessionIdAndOrder_OrderStatus(
+                diningSessionId,OrderStatus.COMPLETED)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        orderItem -> orderItem.getFood().getFoodId()
+                ))
+                .values()
+                .stream()
+                .map(orderItems -> {
+                    int totalQuantity = orderItems.stream()
+                            .mapToInt(OrderItem::getQuantity)
+                            .sum();
+                    double totalPrice = orderItems.stream()
+                            .mapToDouble(OrderItem::getTotalPrice)
+                            .sum();
+
+                    double price = orderItems.getFirst().getFood().getPrice();
+                    return new GetOrderItemDTO(
+                            orderItems.getFirst().getFood().getFoodName(),
+                            totalQuantity,
+                            totalPrice,
+                            price
+                    );
+                }).toList();
+
+
+    }
+
+
 
 }
