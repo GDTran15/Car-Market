@@ -72,4 +72,12 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     List<GetOrderNumberForEachStatus> getOrderCountByOrderStatus();
 
     boolean existsByDiningSession_DiningSessionIdAndOrderStatusIn(Long diningSessionId, List<OrderStatus> orderStatus);
+
+    @Query("""
+    SELECT COALESCE(SUM(o.orderPrice), 0)
+    FROM Order o
+    WHERE o.diningSession.diningSessionId = :diningSessionId
+    AND o.orderStatus = :orderStatus
+    """)
+    double getTotalOrderPriceByDiningSessionIdAndStatus(@Param("diningSessionId") Long diningSessionId,@Param("orderStatus") OrderStatus orderStatus);
 }

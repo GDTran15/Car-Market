@@ -2,20 +2,37 @@ package com.duong.RestaurantManagement.controller;
 
 
 import com.duong.RestaurantManagement.dto.invoice.response.InvoiceResponseDTO;
+import com.duong.RestaurantManagement.dto.invoice.response.UpdateInvoiceMemberResponse;
 import com.duong.RestaurantManagement.model.Invoice;
 import com.duong.RestaurantManagement.service.InvoiceService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/invoices")
+@Validated
 public class InvoiceController {
 
-
     private final InvoiceService invoiceService;
+
+    @GetMapping("")
+    public ResponseEntity<List<InvoiceResponseDTO>> getTodayInvoices() {
+        return ResponseEntity.ok(invoiceService.getTodayInvoice());
+    }
+
+    @GetMapping("/{invoiceId}")
+    public ResponseEntity<InvoiceResponseDTO> getInvoice(@PathVariable Long invoiceId) {
+        return ResponseEntity.ok(invoiceService.getInvoice(invoiceId));
+    }
+
 
     @PostMapping("/{tableId}")
     public ResponseEntity<InvoiceResponseDTO> addInvoice(
@@ -26,7 +43,10 @@ public class InvoiceController {
     }
 
     @PutMapping("/addMember/{invoiceId}")
-    public ResponseEntity<InvoiceResponseDTO> updateInvoiceWithMembership(@PathVariable Long invoiceId, @RequestParam String memberPhone){
+    public ResponseEntity<UpdateInvoiceMemberResponse> updateInvoiceWithMembership(@PathVariable Long invoiceId,
+                                                                                   @RequestParam
+                                                                          @NotBlank(message = "Enter member Phone number")
+                                                                          String memberPhone){
 
         return ResponseEntity.ok( invoiceService.invoiceChangeAfterMember(invoiceId,memberPhone));
     }

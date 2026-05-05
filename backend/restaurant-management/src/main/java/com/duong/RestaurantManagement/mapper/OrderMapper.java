@@ -47,6 +47,7 @@ public class OrderMapper {
             return new GetOrderItemDTO(
                     orderItem.getFood().getFoodName(),
                     orderItem.getQuantity(),
+                    orderItem.getFood().getPrice(),
                     orderItem.getTotalPrice()
             );
         }

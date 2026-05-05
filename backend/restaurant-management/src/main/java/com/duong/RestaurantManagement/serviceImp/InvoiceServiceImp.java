@@ -2,6 +2,8 @@ package com.duong.RestaurantManagement.serviceImp;
 
 
 import com.duong.RestaurantManagement.dto.invoice.response.InvoiceResponseDTO;
+import com.duong.RestaurantManagement.dto.invoice.response.UpdateInvoiceMemberResponse;
+import com.duong.RestaurantManagement.dto.order.response.GetOrderItemDTO;
 import com.duong.RestaurantManagement.exception.InvalidOrderStateException;
 import com.duong.RestaurantManagement.exception.InvoiceHasBeenPaidException;
 import com.duong.RestaurantManagement.exception.ResourceNotFoundException;
@@ -13,7 +15,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +51,8 @@ public class InvoiceServiceImp implements InvoiceService {
             throw new InvalidOrderStateException("There still active order in dining session");
         }
 
+        List<GetOrderItemDTO> orderItems = diningSessionService.getDiningSessionOrderItems(diningSession.getDiningSessionId());
+
         double diningSessionPrice = diningSessionService.getDiningSessionTotalOrderPrice(diningSession.getDiningSessionId());
         Invoice invoice = Invoice.builder()
                 .payBeforeDiscount(diningSessionPrice)
@@ -58,16 +65,17 @@ public class InvoiceServiceImp implements InvoiceService {
         invoiceRepo.save(invoice);
         diningSessionService.deactiveDinningSession(diningSession.getDiningSessionId());
         restaurantTableService.changeTableStatus(diningSession.getRestaurantTable());
-        return InvoiceMapper.invoiceToCreateInvoiceResponse(invoice);
+        return InvoiceMapper.invoiceToCreateInvoiceResponse(invoice,  orderItems);
     }
 
     @Override
     @Transactional
-    public InvoiceResponseDTO invoiceChangeAfterMember(Long invoiceId, String memberPhone) {
+    public UpdateInvoiceMemberResponse invoiceChangeAfterMember(Long invoiceId, String memberPhone) {
         Invoice invoice = invoiceRepo.findById(invoiceId).orElseThrow(
                 () -> new ResourceNotFoundException("No invoice found ")
         );
         checkIfInvoiceIsPaid(invoice.getInvoiceStatus(), "Cannot add member after invoice been paid");
+
 
         Member member = memberRepo.findByMemberPhone(memberPhone).orElseThrow(
                 () -> new ResourceNotFoundException("No member found ")
@@ -77,7 +85,7 @@ public class InvoiceServiceImp implements InvoiceService {
 
         invoiceRepo.save(invoice);
 
-        return InvoiceMapper.invoiceToCreateInvoiceResponse(invoice);
+        return InvoiceMapper.mapToUpdateInvoiceMemberResponse(invoice,member);
     }
 
     private void applyMemberDiscount(Invoice invoice, Member member) {
@@ -101,6 +109,28 @@ public class InvoiceServiceImp implements InvoiceService {
 
         }
         invoiceRepo.save(invoice);
+    }
+
+    @Override
+    public List<InvoiceResponseDTO> getTodayInvoice() {
+        LocalDate today = LocalDate.now();
+
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        return invoiceRepo.findListOfTodayInvoice(startOfDay, endOfDay);
+    }
+
+    @Override
+    public InvoiceResponseDTO getInvoice(Long invoiceId) {
+        Invoice invoice = invoiceRepo.findById(invoiceId).orElseThrow(
+                () -> new ResourceNotFoundException("No invoice found ")
+        );
+
+        List<GetOrderItemDTO> invoiceItems = diningSessionService.getDiningSessionOrderItems(invoice.getDiningSession().getDiningSessionId());
+        return InvoiceMapper.invoiceToCreateInvoiceResponse(
+                invoice,invoiceItems
+        );
     }
 
     private void checkIfInvoiceIsPaid( InvoiceStatus  invoiceStatus, String message) {
