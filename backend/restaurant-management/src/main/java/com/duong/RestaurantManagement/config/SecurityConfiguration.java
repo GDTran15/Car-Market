@@ -121,7 +121,7 @@ public class SecurityConfiguration {
                             response.setContentType("application/json");
                             response.getWriter().write(
                                     """
-                                           {"message":"Jwt token expired!"}
+                                           {"message":"Unauthorized access!"}
                                            """
                             );
                         }
