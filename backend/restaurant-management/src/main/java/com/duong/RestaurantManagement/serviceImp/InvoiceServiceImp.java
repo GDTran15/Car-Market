@@ -108,6 +108,8 @@ public class InvoiceServiceImp implements InvoiceService {
             memberService.updateMemberAfterPayment(invoice.getMember(), invoice.getTotalPay());
 
         }
+        diningSessionService.deactiveDinningSession(invoice.getDiningSession().getDiningSessionId());
+        restaurantTableService.changeTableStatus(invoice.getDiningSession().getRestaurantTable());
         invoiceRepo.save(invoice);
     }
 
