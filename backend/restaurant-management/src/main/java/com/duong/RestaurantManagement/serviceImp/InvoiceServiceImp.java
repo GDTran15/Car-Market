@@ -63,8 +63,9 @@ public class InvoiceServiceImp implements InvoiceService {
                 .invoiceStatus(InvoiceStatus.UNPAID)
                 .build();
         invoiceRepo.save(invoice);
-        diningSessionService.deactiveDinningSession(diningSession.getDiningSessionId());
-        restaurantTableService.changeTableStatus(diningSession.getRestaurantTable());
+        // the diningsession and table status must not change if the invoice is not paid yet
+       // diningSessionService.deactiveDinningSession(diningSession.getDiningSessionId());
+        //restaurantTableService.changeTableStatus(diningSession.getRestaurantTable());
         return InvoiceMapper.invoiceToCreateInvoiceResponse(invoice,  orderItems);
     }
 
@@ -131,7 +132,7 @@ public class InvoiceServiceImp implements InvoiceService {
 
         List<GetOrderItemDTO> invoiceItems = diningSessionService.getDiningSessionOrderItems(invoice.getDiningSession().getDiningSessionId());
         return InvoiceMapper.invoiceToCreateInvoiceResponse(
-                invoice,invoiceItems
+                invoice, invoiceItems
         );
     }
 

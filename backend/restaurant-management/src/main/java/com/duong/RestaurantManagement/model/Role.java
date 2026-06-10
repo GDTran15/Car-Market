@@ -51,7 +51,7 @@ public enum Role {
         );
 
 
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
+        authorities.add(new SimpleGrantedAuthority("ROLE_can" + this.name()));
         return authorities; //return a list of role so it will include role and permission
     }
 }

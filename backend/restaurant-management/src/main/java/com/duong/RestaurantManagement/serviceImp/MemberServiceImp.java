@@ -1,7 +1,10 @@
 package com.duong.RestaurantManagement.serviceImp;
 
 import com.duong.RestaurantManagement.dto.member.request.AddMemberRequest;
+import com.duong.RestaurantManagement.dto.member.response.GetMemberInfoDTO;
 import com.duong.RestaurantManagement.exception.DuplicateResourceException;
+import com.duong.RestaurantManagement.exception.ResourceNotFoundException;
+import com.duong.RestaurantManagement.mapper.MemberMapper;
 import com.duong.RestaurantManagement.model.Member;
 import com.duong.RestaurantManagement.repo.MemberRepo;
 import com.duong.RestaurantManagement.service.MemberService;
@@ -44,6 +47,15 @@ public class MemberServiceImp implements MemberService {
         member.setTotalSpent(member.getTotalSpent() + totalPay);
         updateMemberRankAfter(member);
         memberRepo.save(member);
+
+    }
+
+    @Override
+    public GetMemberInfoDTO getMemberByPhoneNumber(String phoneNumber) {
+       return   MemberMapper.memberToGetMemberInfoDTO(
+                memberRepo.findByMemberPhone(phoneNumber).orElseThrow(
+                        () -> new ResourceNotFoundException("Cannot find member")
+                ));
 
     }
 
