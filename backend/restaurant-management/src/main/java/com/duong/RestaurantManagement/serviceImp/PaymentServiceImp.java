@@ -75,6 +75,12 @@ public class PaymentServiceImp implements PaymentService {
                                         .build()
                         )
                 )
+                        .applicationContext(
+                                new OrderApplicationContext.Builder()
+                                        .returnUrl(request.returnUrl())
+                                        .cancelUrl(request.cancelUrl())
+                                        .build()
+                        )
                         .build()
         )
                 .prefer("return=representation")
