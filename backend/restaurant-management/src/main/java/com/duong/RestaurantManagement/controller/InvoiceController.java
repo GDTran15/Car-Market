@@ -33,6 +33,14 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceService.getInvoice(invoiceId));
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<InvoiceResponseDTO> getActiveInvoice(@RequestParam Long diningSessionId) {
+
+        return invoiceService.getActiveUnpaidInvoice(diningSessionId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
 
     @PostMapping("/{tableId}")
     public ResponseEntity<InvoiceResponseDTO> addInvoice(
@@ -51,6 +59,10 @@ public class InvoiceController {
         return ResponseEntity.ok( invoiceService.invoiceChangeAfterMember(invoiceId,memberPhone));
     }
 
+    @PatchMapping("/{invoiceId}/cancel")
+    public ResponseEntity<InvoiceResponseDTO> cancelInvoice(@PathVariable Long invoiceId){
+        return ResponseEntity.ok(invoiceService.cancelInvoice(invoiceId));
+    }
 
 
 }
