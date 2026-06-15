@@ -53,8 +53,8 @@ public class PaymentServiceImp implements PaymentService {
                 () -> new ResourceNotFoundException("Invoice not found")
         );
 
-        if (invoice.getInvoiceStatus() == InvoiceStatus.PAID) {
-            throw new InvoiceHasBeenPaidException("Invoice has been paid");
+        if (invoice.getInvoiceStatus() != InvoiceStatus.UNPAID) {
+            throw new InvoiceHasBeenPaidException("Invoice cannot be paid");
         }
 
         OrdersController ordersController = paypalClient.getOrdersController();
