@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +53,13 @@ public class InvoiceServiceImp implements InvoiceService {
         }
 
         List<GetOrderItemDTO> orderItems = diningSessionService.getDiningSessionOrderItems(diningSession.getDiningSessionId());
+        Optional<Invoice> unpaidInvoice = invoiceRepo.findFirstByDiningSession_DiningSessionIdAndInvoiceStatusOrderByCreatedAtDesc(
+                diningSession.getDiningSessionId(),
+                InvoiceStatus.UNPAID
+        );
+        if (unpaidInvoice.isPresent()) {
+            return InvoiceMapper.invoiceToCreateInvoiceResponse(unpaidInvoice.get(), orderItems);
+        }
 
         double diningSessionPrice = diningSessionService.getDiningSessionTotalOrderPrice(diningSession.getDiningSessionId());
         Invoice invoice = Invoice.builder()
@@ -75,7 +83,7 @@ public class InvoiceServiceImp implements InvoiceService {
         Invoice invoice = invoiceRepo.findById(invoiceId).orElseThrow(
                 () -> new ResourceNotFoundException("No invoice found ")
         );
-        checkIfInvoiceIsPaid(invoice.getInvoiceStatus(), "Cannot add member after invoice been paid");
+        checkIfInvoiceCanChange(invoice.getInvoiceStatus(), "Cannot add member after invoice is closed");
 
 
         Member member = memberRepo.findByMemberPhone(memberPhone).orElseThrow(
@@ -102,7 +110,7 @@ public class InvoiceServiceImp implements InvoiceService {
     @Override
     @Transactional
     public void markInvoiceAsPaid(Invoice invoice)  {
-        checkIfInvoiceIsPaid(invoice.getInvoiceStatus(), "Invoice has been paid");
+        checkIfInvoiceCanChange(invoice.getInvoiceStatus(), "Invoice cannot be paid");
         invoice.setInvoiceStatus(InvoiceStatus.PAID);
         if (invoice.getMember() != null) {
 
@@ -136,8 +144,34 @@ public class InvoiceServiceImp implements InvoiceService {
         );
     }
 
-    private void checkIfInvoiceIsPaid( InvoiceStatus  invoiceStatus, String message) {
-        if (invoiceStatus == InvoiceStatus.PAID){
+    @Override
+    public Optional<InvoiceResponseDTO> getActiveUnpaidInvoice(Long diningSessionId) {
+        return invoiceRepo.findFirstByDiningSession_DiningSessionIdAndInvoiceStatusOrderByCreatedAtDesc(
+                diningSessionId,
+                InvoiceStatus.UNPAID
+        ).map((invoice) -> {
+            List<GetOrderItemDTO> invoiceItems = diningSessionService.getDiningSessionOrderItems(diningSessionId);
+            return InvoiceMapper.invoiceToCreateInvoiceResponse(invoice, invoiceItems);
+        });
+    }
+
+    @Override
+    @Transactional
+    public InvoiceResponseDTO cancelInvoice(Long invoiceId) {
+        Invoice invoice = invoiceRepo.findById(invoiceId).orElseThrow(
+                () -> new ResourceNotFoundException("No invoice found ")
+        );
+        checkIfInvoiceCanChange(invoice.getInvoiceStatus(), "Only unpaid invoices can be cancelled");
+
+        invoice.setInvoiceStatus(InvoiceStatus.CANCELLED);
+        invoiceRepo.save(invoice);
+
+        List<GetOrderItemDTO> invoiceItems = diningSessionService.getDiningSessionOrderItems(invoice.getDiningSession().getDiningSessionId());
+        return InvoiceMapper.invoiceToCreateInvoiceResponse(invoice, invoiceItems);
+    }
+
+    private void checkIfInvoiceCanChange( InvoiceStatus  invoiceStatus, String message) {
+        if (invoiceStatus != InvoiceStatus.UNPAID){
             throw new InvoiceHasBeenPaidException(message);
         }
     }
