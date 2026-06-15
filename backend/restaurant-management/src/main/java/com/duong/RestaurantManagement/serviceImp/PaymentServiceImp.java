@@ -152,5 +152,37 @@ public class PaymentServiceImp implements PaymentService {
             }
         }
 
+    @Override
+    @Transactional
+    public Payment createCashPayment(CashPaymentRequest request) {
+        Invoice invoice = invoiceRepo.findById(request.invoiceId()).orElseThrow(
+                () -> new ResourceNotFoundException("Invoice not found")
+        );
+
+        if (invoice.getInvoiceStatus() != InvoiceStatus.UNPAID) {
+            throw new InvoiceHasBeenPaidException("Invoice cannot be paid");
+        }
+
+        BigDecimal invoiceTotal = BigDecimal.valueOf(invoice.getTotalPay()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal amountReceived = request.amountReceived().setScale(2, RoundingMode.HALF_UP);
+        if (amountReceived.compareTo(invoiceTotal) < 0) {
+            throw new InvalidOrderStateException("Cash amount is less than invoice total");
+        }
+
+        Payment payment = Payment.builder()
+                .amount(invoiceTotal)
+                .paidAt(LocalDateTime.now())
+                .paypalOrderId(null)
+                .paymentStatus(PaymentStatus.COMPLETED)
+                .paymentMethod(PaymentMethod.CASH)
+                .invoice(invoice)
+                .cashChange(amountReceived.subtract(invoiceTotal))
+                .build();
+        paymentRepo.save(payment);
+        invoiceService.markInvoiceAsPaid(invoice);
+
+        return payment;
+    }
+
 
 }
