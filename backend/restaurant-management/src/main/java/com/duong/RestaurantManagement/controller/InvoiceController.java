@@ -35,7 +35,6 @@ public class InvoiceController {
 
     @GetMapping("/active")
     public ResponseEntity<InvoiceResponseDTO> getActiveInvoice(@RequestParam Long diningSessionId) {
-
         return invoiceService.getActiveUnpaidInvoice(diningSessionId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
