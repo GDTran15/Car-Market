@@ -1,12 +1,13 @@
 package com.duong.RestaurantManagement.controller;
 
+import com.duong.RestaurantManagement.dto.payment.request.CashPaymentRequest;
 import com.duong.RestaurantManagement.dto.payment.request.CreateOrderPaypalRequest;
 import com.duong.RestaurantManagement.dto.payment.response.CaptureOrderPaypalResponse;
 import com.duong.RestaurantManagement.dto.payment.response.CreateOrderPaypalResponse;
-import com.duong.RestaurantManagement.model.Payment;
 import com.duong.RestaurantManagement.service.PaymentService;
 import com.paypal.sdk.models.LinkDescription;
 import com.paypal.sdk.models.Order;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +52,10 @@ public class PaymentController {
         ) ;
     }
 
+    @PostMapping("/cash")
+    public ResponseEntity<Void> processCashPayment(@Valid @RequestBody CashPaymentRequest request) {
+        paymentService.createCashPayment(request);
+        return ResponseEntity.noContent().build();
+    }
 
 }
