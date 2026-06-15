@@ -29,6 +29,10 @@ public class Payment {
 
     private PaymentStatus paymentStatus;
 
+    @Builder.Default
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal cashChange = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
