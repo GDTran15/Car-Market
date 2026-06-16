@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { FaMoneyBillWave } from "react-icons/fa";
 import Button from "../../../component/Button";
 import InputField from "../../../component/InputField";
 import api from "../../../api";
@@ -12,9 +13,15 @@ export default function InvoicePage() {
   const [member, setMember] = useState(null);
   const [memberError, setMemberError] = useState("");
   const [isCheckingMember, setIsCheckingMember] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [cashAmount, setCashAmount] = useState("");
+  const [paymentError, setPaymentError] = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState("");
+  const [isProcessingCashPayment, setIsProcessingCashPayment] = useState(false);
+  const [isCancellingInvoice, setIsCancellingInvoice] = useState(false);
 
   useEffect(() => {
-    if (invoice || !invoiceId || invoiceId === "created") return;
+    if (invoice || !invoiceId ) return;
 
     const fetchInvoice = async () => {
       try {
@@ -35,6 +42,8 @@ export default function InvoicePage() {
   const subtotal = invoice?.payBeforeDiscount ?? 0;
   const discount = invoice?.discountAmount ?? 0;
   const total = invoice?.totalPay ?? 0;
+  const invoiceStatus = invoice?.invoiceStatus ?? invoice?.status;
+  const canUpdateInvoice = invoiceStatus === "UNPAID";
 
   const handleUpdateMember = async () => {
     if (!phone) {
@@ -68,6 +77,63 @@ export default function InvoicePage() {
       setMemberError(error.response?.data?.message || "Unable to update membership");
     } finally {
       setIsCheckingMember(false);
+    }
+  };
+
+  const handleCashPayment = async () => {
+    const currentInvoiceId = invoice?.invoiceId ?? invoiceId;
+
+    if (!currentInvoiceId) {
+      setPaymentError("Invoice not ready");
+      return;
+    }
+
+    if (!cashAmount || Number(cashAmount) <= 0) {
+      setPaymentError("Enter cash amount received");
+      return;
+    }
+
+    setPaymentError("");
+    setPaymentSuccess("");
+    setIsProcessingCashPayment(true);
+
+    try {
+      await api.post("/payments/cash", {
+        invoiceId: currentInvoiceId,
+        amountReceived: Number(cashAmount),
+      });
+      setInvoice((currentInvoice) => ({
+        ...currentInvoice,
+        invoiceStatus: "PAID",
+      }));
+      setPaymentSuccess("Cash payment recorded.");
+    } catch (error) {
+      setPaymentError(error.response?.data?.message || "Unable to record cash payment");
+    } finally {
+      setIsProcessingCashPayment(false);
+    }
+  };
+
+  const handleCancelInvoice = async () => {
+    const currentInvoiceId = invoice?.invoiceId ?? invoiceId;
+
+    if (!currentInvoiceId) {
+      setPaymentError("Invoice not ready");
+      return;
+    }
+
+    setPaymentError("");
+    setPaymentSuccess("");
+    setIsCancellingInvoice(true);
+
+    try {
+      const response = await api.patch(`/invoices/${currentInvoiceId}/cancel`);
+      setInvoice(response.data);
+      setPaymentSuccess("Invoice cancelled. Customer can continue ordering.");
+    } catch (error) {
+      setPaymentError(error.response?.data?.message || "Unable to cancel invoice");
+    } finally {
+      setIsCancellingInvoice(false);
     }
   };
 
@@ -137,7 +203,7 @@ export default function InvoicePage() {
             setValue={setPhone}
             error={memberError}
           />
-          <Button variant="navy" width="w-full" onClick={handleUpdateMember} disabled={isCheckingMember}>
+          <Button variant="navy" width="w-full" onClick={handleUpdateMember} disabled={isCheckingMember || !canUpdateInvoice}>
             {isCheckingMember ? "Updating..." : member ? "Change Membership" : "Apply Membership"}
           </Button>
 
@@ -152,6 +218,68 @@ export default function InvoicePage() {
               <p className="text-sm text-gray-500">New Total: ${Number(member.totalPay ?? 0).toFixed(2)}</p>
             </div>
           ) : ""}
+
+          <div className="mt-6 border-t border-gray-200 pt-6">
+            <h5 className="text-xl font-bold text-main-navy mb-4">Staff Payment</h5>
+            <Button
+              variant="navy"
+              width="w-full"
+              onClick={() => setShowPaymentOptions((isOpen) => !isOpen)}
+              disabled={!canUpdateInvoice}
+            >
+              Pay Invoice
+            </Button>
+
+            {showPaymentOptions ? (
+              <div className="mt-4 grid gap-3">
+                <InputField
+                  label="Cash Amount Received"
+                  inputType="number"
+                  placeholder="Enter cash received"
+                  value={cashAmount}
+                  setValue={setCashAmount}
+                />
+                <Button
+                  variant="navy"
+                  width="w-full"
+                  onClick={handleCashPayment}
+                  disabled={isProcessingCashPayment || !canUpdateInvoice}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <FaMoneyBillWave size={20} />
+                    {isProcessingCashPayment ? "Recording..." : "Record Cash Payment"}
+                  </span>
+                </Button>
+
+                {paymentError ? (
+                  <p className="text-sm font-semibold text-red-500">{paymentError}</p>
+                ) : ""}
+                {paymentSuccess ? (
+                  <p className="text-sm font-semibold text-green-600">{paymentSuccess}</p>
+                ) : ""}
+              </div>
+            ) : ""}
+
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                width="w-full"
+                onClick={handleCancelInvoice}
+                disabled={isCancellingInvoice || !canUpdateInvoice}
+              >
+                {isCancellingInvoice ? "Cancelling..." : "Cancel Invoice"}
+              </Button>
+              <p className="mt-2 text-sm text-gray-500">
+                Cancelling lets the customer continue ordering from the table QR code.
+              </p>
+              {paymentSuccess && !showPaymentOptions ? (
+                <p className="mt-3 text-sm font-semibold text-green-600">{paymentSuccess}</p>
+              ) : ""}
+              {paymentError && !showPaymentOptions ? (
+                <p className="mt-3 text-sm font-semibold text-red-500">{paymentError}</p>
+              ) : ""}
+            </div>
+          </div>
         </div>
       </div>
     </>

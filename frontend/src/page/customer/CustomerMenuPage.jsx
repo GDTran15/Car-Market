@@ -4,8 +4,9 @@ import { useInView } from "react-intersection-observer";
 import CustomerMenuNavbar from "../../component/CustomerMenuNavBar";
 import MenuSection from "../../component/MenuSection";
 import CartSidebar from "../../component/CartSidebar";
+import Button from "../../component/Button";
 
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { publicApi } from "../../api";
 
 
@@ -15,6 +16,8 @@ export default function CustomerMenuPage() {
   const [menuName, setMenuName] = useState("");
   const [categoryList, setCategoryList] = useState([]);
   const [diningSessionId,setDiningSessionId] = useState(null);
+  const [activeInvoice, setActiveInvoice] = useState(null);
+  const [orderError, setOrderError] = useState("");
    const { token } = useParams();
 
   
@@ -61,7 +64,31 @@ useEffect(() => {
     authenticateDiningSession();
   }
 }, [token]);
+
+useEffect(() => {
+  if (!diningSessionId) return;
+
+  const fetchActiveInvoice = async () => {
+    try {
+      const response = await publicApi.get("/invoices/active", {
+        params: { diningSessionId },
+      });
+      setActiveInvoice(response.status === 204 ? null : response.data);
+    } catch (error) {
+      console.log(error.response);
+      setActiveInvoice(null);
+    }
+  };
+
+  fetchActiveInvoice();
+}, [diningSessionId]);
+
  const submitOrder = async () => {
+  if (activeInvoice?.invoiceId) {
+    setOrderError("Invoice has already been created. Please view and pay the invoice before ordering more.");
+    return;
+  }
+
   try {
     const response = await publicApi.post(
       "/orders",
@@ -73,6 +100,7 @@ useEffect(() => {
 
     setCartList([]);
     setCartListToShow([]);
+    setOrderError("");
     console.log(response);
 
   } catch (error) {
@@ -190,6 +218,19 @@ useEffect(() => {
           {menuName || "Our Menu"}
         </h1>
 
+        {activeInvoice?.invoiceId ? (
+          <div className="bg-white rounded-xl border border-gray-300 p-6">
+            <h2 className="text-xl font-bold text-main-navy">Invoice created</h2>
+            <p className="mt-2 text-gray-500">
+              Ordering is paused for this table. You can continue ordering only if staff cancels the invoice.
+            </p>
+            <Link to={`/customer/invoice/${token}/${activeInvoice.invoiceId}`} className="mt-5 inline-block">
+              <Button variant="navy">
+                View Invoice
+              </Button>
+            </Link>
+          </div>
+        ) : (
         <div className="flex gap-6 items-start">
           
           <MenuSection
@@ -210,6 +251,11 @@ useEffect(() => {
             handleSubmit={ submitOrder}
           />
         </div>
+        )}
+
+        {orderError ? (
+          <p className="mt-4 text-sm font-semibold text-red-500">{orderError}</p>
+        ) : ""}
       </div>
     </>
   );

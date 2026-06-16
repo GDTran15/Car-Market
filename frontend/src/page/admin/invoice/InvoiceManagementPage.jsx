@@ -11,6 +11,7 @@ const STATUS_OPTIONS = [
 export default function InvoiceManagementPage() {
   const navigate = useNavigate();
   const [currentStatus, setCurrentStatus] = useState("UNPAID");
+  const [paidInvoiceDate, setPaidInvoiceDate] = useState("");
   const [invoices, setInvoices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,8 +36,13 @@ export default function InvoiceManagementPage() {
   }, []);
 
   const filteredInvoices = useMemo(() => {
-    return invoices.filter((invoice) => invoice.invoiceStatus === currentStatus);
-  }, [currentStatus, invoices]);
+    return invoices.filter((invoice) => {
+      if (invoice.invoiceStatus !== currentStatus) return false;
+      if (currentStatus !== "PAID" || !paidInvoiceDate) return true;
+
+      return getInvoiceDateValue(invoice) === paidInvoiceDate;
+    });
+  }, [currentStatus, invoices, paidInvoiceDate]);
 
   const invoiceTotal = useMemo(() => {
     return filteredInvoices.reduce((sum, invoice) => sum + Number(invoice.totalPay ?? 0), 0);
@@ -55,18 +61,35 @@ export default function InvoiceManagementPage() {
         </div>
       </div>
 
-      <nav className="bg-dark-cream mb-7 font-bold inline-flex space-x-1 p-1 rounded-2xl">
-        {STATUS_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => setCurrentStatus(option.value)}
-            className={`horizontal-nav-bar ${currentStatus === option.value ? "horizontal-nav-bar-active" : ""}`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </nav>
+      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <nav className="bg-dark-cream font-bold inline-flex w-fit space-x-1 p-1 rounded-2xl">
+          {STATUS_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setCurrentStatus(option.value)}
+              className={`horizontal-nav-bar ${currentStatus === option.value ? "horizontal-nav-bar-active" : ""}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </nav>
+
+        {currentStatus === "PAID" ? (
+          <div className="flex flex-col gap-1 sm:items-end">
+            <label htmlFor="paid-invoice-date" className="text-sm font-semibold text-gray-500">
+              Paid invoice date
+            </label>
+            <input
+              id="paid-invoice-date"
+              type="date"
+              value={paidInvoiceDate}
+              onChange={(event) => setPaidInvoiceDate(event.target.value)}
+              className="rounded-xl border border-gray-300 bg-white px-4 py-2 font-semibold text-main-navy outline-none transition focus:border-main-navy focus:ring-2 focus:ring-main-navy/10"
+            />
+          </div>
+        ) : ""}
+      </div>
 
       <div className="bg-white border border-gray-300 rounded-xl overflow-hidden">
         <div className="grid grid-cols-12 bg-input-bg px-4 py-3 text-sm font-bold text-gray-500">
@@ -115,4 +138,15 @@ export default function InvoiceManagementPage() {
 
 function getStatusClass(status) {
   return status === "PAID" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
+}
+
+function getInvoiceDateValue(invoice) {
+  const invoiceDate = invoice.createdAt ?? invoice.invoiceTime;
+  if (!invoiceDate) return "";
+
+  const date = new Date(invoiceDate);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return offsetDate.toISOString().slice(0, 10);
 }
